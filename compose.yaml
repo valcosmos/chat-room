@@ -1,0 +1,22 @@
+
+services:
+  mysql:
+    image: mysql:lts
+    environment:
+      MYSQL_DATABASE: chat_room
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_USER: chat_room # 要创建的用户
+      MYSQL_PASSWORD: '123456' # 上述用户的密码
+    ports:
+      - '3306:3306' # 映射端口
+    command:
+      - --mysql-native-password=ON
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --explicit_defaults_for_timestamp=true
+    #   - --upgrade=MINIMAL
+    #   - --upgrade=FORCE
+    volumes:
+      - ./mysql-data/config:/etc/mysql/my.cnf
+      - ./mysql-data/data/:/var/lib/mysql/
+      - ./mysql-data/entrypoint/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
