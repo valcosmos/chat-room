@@ -1,4 +1,4 @@
-import { Controller, Get, SetMetadata } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RequireLogin, UserInfo } from './custom.decorator';
 

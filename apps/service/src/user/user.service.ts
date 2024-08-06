@@ -5,7 +5,6 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { RegisterUserDto } from './dto/register-user.dto';
