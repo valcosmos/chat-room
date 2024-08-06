@@ -175,4 +175,51 @@ export class UserService {
       return '用户信息修改成功';
     }
   }
+
+  async getFriendship(userId: number) {
+    const friends = await this.prismaService.friendship.findMany({
+      where: {
+        OR: [
+          {
+            userId: userId,
+          },
+          {
+            friendId: userId,
+          },
+        ],
+      },
+    });
+
+    const set = new Set<number>();
+    // for (let i = 0; i < friends.length; i++) {
+    //   set.add(friends[i].userId);
+    //   set.add(friends[i].friendId);
+    // }
+
+    for (const item of friends) {
+      set.add(item.userId);
+      set.add(item.friendId);
+    }
+
+    const friendIds = [...set].filter((item) => item !== userId);
+
+    const res = [];
+
+    for (const item of friendIds) {
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: item,
+        },
+        select: {
+          id: true,
+          username: true,
+          nickName: true,
+          email: true,
+        },
+      });
+      res.push(user);
+    }
+
+    return res;
+  }
 }

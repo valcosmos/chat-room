@@ -93,4 +93,10 @@ export class UserController {
   ) {
     return await this.userService.update(userId, updateUserDto);
   }
+
+  @Get('friendship')
+  @RequireLogin()
+  async friendship(@UserInfo('userId') userId: number) {
+    return this.userService.getFriendship(userId);
+  }
 }
