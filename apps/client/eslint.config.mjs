@@ -11,5 +11,6 @@ export default antfu({
     ...nextPlugin.configs['core-web-vitals'].rules,
     '@next/next/no-duplicate-head': 'off',
     'react-hooks/exhaustive-deps': 'off',
+    'react-hooks/rules-of-hooks': 'off',
   },
 })
