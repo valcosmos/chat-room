@@ -1,14 +1,16 @@
-import { useForm } from 'antd/es/form/Form'
-import { Button, Form, Input, message } from 'antd'
-import { useRouter } from 'next/navigation'
-import React from 'react'
-import { updatePassword, updatePasswordCaptcha } from '@/interface'
+'use client'
 
-export interface UpdatePassword {
+import { Button, Form, Input, message } from 'antd'
+import { useForm } from 'antd/es/form/Form'
+import { useRouter } from 'next/navigation'
+import React, { useEffect } from 'react'
+import { getUserInfo, updateInfo, updateUserInfoCaptcha } from '@/interface'
+
+export interface UserInfo {
+  headPic: string
+  nickName: string
   email: string
   captcha: string
-  password: string
-  confirmPassword: string
 }
 
 const layout1 = {
@@ -16,22 +18,29 @@ const layout1 = {
   wrapperCol: { span: 18 },
 }
 
-export default function page() {
+export default function UpdateInfo() {
   const [form] = useForm()
   const router = useRouter()
 
-  const onFinish = async (values: UpdatePassword) => {
-    if (values.password !== values.confirmPassword) {
-      return message.error('两次密码不一致')
-    }
-    try {
-      const res = await updatePassword(values)
+  useEffect(() => {
+    async function query() {
+      const res = await getUserInfo()
 
       if (res.status === 201 || res.status === 200) {
-        message.success('密码修改成功')
-        setTimeout(() => {
-          router.push('/login')
-        }, 1500)
+        form.setFieldValue('headPic', res.data.headPic)
+        form.setFieldValue('nickName', res.data.nickName)
+        form.setFieldValue('email', res.data.email)
+        form.setFieldValue('username', res.data.username)
+      }
+    }
+    query()
+  }, [])
+
+  const onFinish = async (values: UserInfo) => {
+    try {
+      const res = await updateInfo(values)
+      if (res.status === 201 || res.status === 200) {
+        message.success('用户信息更新成功')
       }
     }
     catch (e: any) {
@@ -40,13 +49,8 @@ export default function page() {
   }
 
   const sendCaptcha = async function () {
-    const address = form.getFieldValue('email')
-    if (!address) {
-      return message.error('请输入邮箱地址')
-    }
-
     try {
-      const res = await updatePasswordCaptcha(address)
+      const res = await updateUserInfoCaptcha()
       if (res.status === 201 || res.status === 200) {
         message.success('发送成功')
       }
@@ -57,16 +61,16 @@ export default function page() {
   }
 
   return (
-    <div className="w-96 mx-auto mt-24">
-      <h1>聊天室</h1>
+    <div className="w-96 mx-auto mt-20">
       <Form form={form} {...layout1} onFinish={onFinish} colon={false} autoComplete="off">
-        <Form.Item
-          label="用户名"
-          name="username"
-          rules={[{ required: true, message: '请输入用户名!' }]}
-        >
+        <Form.Item label="头像" name="headPic" rules={[{ required: true, message: '请输入头像!' }]}>
           <Input />
         </Form.Item>
+
+        <Form.Item label="昵称" name="nickName" rules={[{ required: true, message: '请输入昵称!' }]}>
+          <Input />
+        </Form.Item>
+
         <Form.Item
           label="邮箱"
           name="email"
@@ -91,25 +95,9 @@ export default function page() {
           </Button>
         </div>
 
-        <Form.Item
-          label="密码"
-          name="password"
-          rules={[{ required: true, message: '请输入密码!' }]}
-        >
-          <Input.Password />
-        </Form.Item>
-
-        <Form.Item
-          label="确认密码"
-          name="confirmPassword"
-          rules={[{ required: true, message: '请输入确认密码!' }]}
-        >
-          <Input.Password />
-        </Form.Item>
-
         <Form.Item {...layout1} label=" ">
           <Button block type="primary" htmlType="submit">
-            修改
+            修改密码
           </Button>
         </Form.Item>
       </Form>
