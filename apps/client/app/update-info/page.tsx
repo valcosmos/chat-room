@@ -4,6 +4,7 @@ import { Button, Form, Input, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
+import { HeadPicUpload } from './HeadPicUpload'
 import { getUserInfo, updateInfo, updateUserInfoCaptcha } from '@/interface'
 
 export interface UserInfo {
@@ -41,6 +42,14 @@ export default function UpdateInfo() {
       const res = await updateInfo(values)
       if (res.status === 201 || res.status === 200) {
         message.success('用户信息更新成功')
+        const userInfo = localStorage.getItem('userInfo')
+        if (userInfo) {
+          const info = JSON.parse(userInfo)
+          info.headPic = values.headPic
+          info.nickName = values.nickName
+
+          localStorage.setItem('userInfo', JSON.stringify(info))
+        }
       }
     }
     catch (e: any) {
@@ -63,8 +72,8 @@ export default function UpdateInfo() {
   return (
     <div className="w-96 mx-auto mt-20">
       <Form form={form} {...layout1} onFinish={onFinish} colon={false} autoComplete="off">
-        <Form.Item label="头像" name="headPic" rules={[{ required: true, message: '请输入头像!' }]}>
-          <Input />
+        <Form.Item shouldUpdate label="头像" name="headPic" rules={[{ required: true, message: '请输入头像!' }]}>
+          <HeadPicUpload />
         </Form.Item>
 
         <Form.Item label="昵称" name="nickName" rules={[{ required: true, message: '请输入昵称!' }]}>

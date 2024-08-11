@@ -27,3 +27,13 @@ services:
       - ./mysql-data/config:/etc/mysql/my.cnf
       - ./mysql-data/data/:/var/lib/mysql/
       - ./mysql-data/entrypoint/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - ./minio-data:/bitnami/minio/data
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=12345678
