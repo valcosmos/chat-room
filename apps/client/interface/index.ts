@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { message } from 'antd'
-import type { RegisterUser } from '@/app/register/page'
-import type { UpdatePassword } from '@/app/update-password/page'
-import type { UserInfo } from '@/app/update-info/page'
+import type { RegisterUser } from '@/app/(public)/register/page'
+import type { UpdatePassword } from '@/app/(public)/update-password/page'
+import type { UserInfo } from '@/app/(public)/update-info/page'
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:6000/',
+  baseURL: 'http://localhost:8000',
   timeout: 3000,
 })
 
@@ -89,4 +89,12 @@ export async function updateUserInfoCaptcha() {
 
 export async function presignedUrl(fileName: string) {
   return axiosInstance.get(`/minio/presignedUrl?name=${fileName}`)
+}
+
+export async function friendshipList(name?: string) {
+  return axiosInstance.get(`/friendship/list?name=${name || ''}`)
+}
+
+export async function chatroomList(name: string) {
+  return axiosInstance.get(`/chatroom/list?name=${name}`)
 }

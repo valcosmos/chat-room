@@ -21,7 +21,7 @@ const layout1 = {
 
 export default function UpdateInfo() {
   const [form] = useForm()
-  const router = useRouter()
+  const _router = useRouter()
 
   useEffect(() => {
     async function query() {

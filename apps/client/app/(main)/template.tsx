@@ -1,7 +1,6 @@
-import { UserOutlined } from '@ant-design/icons'
-import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import HeaderUser from './HeaderUser'
+import Menu from './Menu'
 
 export default function Template({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +9,14 @@ export default function Template({ children }: { children: React.ReactNode }) {
         <h1 className="text-4xl">聊天室</h1>
         <HeaderUser />
       </div>
-      <div className="flex-1">{children}</div>
+      <div className="flex-1">
+        <div className="flex">
+          <div className="w-52">
+            <Menu />
+          </div>
+          <div>{children}</div>
+        </div>
+      </div>
     </div>
   )
 }
