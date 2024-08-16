@@ -3,6 +3,7 @@ import { message } from 'antd'
 import type { RegisterUser } from '@/app/(public)/register/page'
 import type { UpdatePassword } from '@/app/(public)/update-password/page'
 import type { UserInfo } from '@/app/(public)/update-info/page'
+import type { AddFriend } from '@/app/(main)/AddFriendModal'
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8000',
@@ -97,4 +98,20 @@ export async function friendshipList(name?: string) {
 
 export async function chatroomList(name: string) {
   return axiosInstance.get(`/chatroom/list?name=${name}`)
+}
+
+export async function friendAdd(data: AddFriend) {
+  return axiosInstance.post('/friendship/add', data)
+}
+
+export async function friendRequestList() {
+  return axiosInstance.get('/friendship/request_list')
+}
+
+export async function agreeFriendRequest(id: number) {
+  return axiosInstance.get(`/friendship/agree/${id}`)
+}
+
+export async function rejectFriendRequest(id: number) {
+  return axiosInstance.get(`/friendship/reject/${id}`)
 }

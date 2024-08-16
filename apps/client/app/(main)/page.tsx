@@ -1,9 +1,11 @@
 'use client'
+
 import { Button, Form, Input, Table, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import type { ColumnsType } from 'antd/es/table'
 import React, { useEffect, useMemo, useState } from 'react'
 import { friendshipList } from '@/interface'
+import { AddFriendModal } from './AddFriendModal'
 
 interface SearchFriend {
   name: string
@@ -71,6 +73,8 @@ export default function Home() {
     }
   }
 
+  const [isAddFriendModalOpen, setAddFriendModalOpen] = useState(false)
+
   const [form] = useForm()
 
   useEffect(() => {
@@ -92,11 +96,26 @@ export default function Home() {
               搜索
             </Button>
           </Form.Item>
+          <Form.Item label=" ">
+            <Button
+              type="primary"
+              style={{ background: 'green' }}
+              onClick={() => setAddFriendModalOpen(true)}
+            >
+              添加好友
+            </Button>
+          </Form.Item>
         </Form>
       </div>
       <div className="friendship-table">
         <Table columns={columns} dataSource={friendshipResult} style={{ width: '1000px' }} />
       </div>
+      <AddFriendModal
+        isOpen={isAddFriendModalOpen}
+        handleClose={() => {
+          setAddFriendModalOpen(false)
+        }}
+      />
     </div>
   )
 }
