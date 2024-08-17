@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, message } from 'antd'
+import { Button, message } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import type { Socket } from 'socket.io-client'
 import { io } from 'socket.io-client'

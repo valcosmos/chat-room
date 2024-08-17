@@ -6,6 +6,5 @@ export class FriendAddDto {
   })
   username: string;
 
-
   reason: string;
 }
