@@ -4,8 +4,10 @@ import { Button, Form, Input, Table, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import type { ColumnsType } from 'antd/es/table'
 import React, { useEffect, useMemo, useState } from 'react'
-import { friendshipList } from '@/interface'
+import { useRouter } from 'next/navigation'
 import { AddFriendModal } from './AddFriendModal'
+import { getUserInfo } from './chat/page'
+import { createOneToOne, findChatroom, friendshipList } from '@/interface'
 
 interface SearchFriend {
   name: string
@@ -21,6 +23,25 @@ interface FriendshipSearchResult {
 
 export default function Home() {
   const [friendshipResult, setFriendshipResult] = useState<Array<FriendshipSearchResult>>([])
+  const router = useRouter()
+  async function goToChat(friendId: number) {
+    const userId = getUserInfo().id
+
+    try {
+      const res = await findChatroom(userId, friendId)
+
+      if (res.data) {
+        router.push(`/chat?chatroomId=${res.data}`)
+      }
+      else {
+        const res2 = await createOneToOne(friendId)
+        router.push(`/chat?chatroomId=${res2.data}`)
+      }
+    }
+    catch (e: any) {
+      message.error(e.response?.data?.message || '系统繁忙，请稍后再试')
+    }
+  }
 
   const columns: ColumnsType<FriendshipSearchResult> = useMemo(
     () => [
@@ -43,9 +64,16 @@ export default function Home() {
       },
       {
         title: '操作',
-        render: (_, _record) => (
+        render: (_, record) => (
           <div>
-            <a href="#">聊天</a>
+            <a
+              href="#"
+              onClick={() => {
+                goToChat(record.id)
+              }}
+            >
+              聊天
+            </a>
           </div>
         ),
       },

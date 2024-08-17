@@ -6,6 +6,42 @@ export class ChatroomService {
   @Inject(PrismaService)
   private prismaService: PrismaService;
 
+  async queryOneToOneChatroom(userId1: number, userId2: number) {
+    const chatrooms = await this.prismaService.userChatroom.findMany({
+      where: {
+        userId: userId1,
+      },
+    });
+    const chatrooms2 = await this.prismaService.userChatroom.findMany({
+      where: {
+        userId: userId2,
+      },
+    });
+
+    let res;
+
+    for (const item of chatrooms) {
+      const chatroom = await this.prismaService.chatroom.findFirst({
+        where: {
+          id: item.chatroomId,
+        },
+      });
+      if (chatroom.type === true) {
+        continue;
+      }
+
+      const found = chatrooms2.find(
+        (item2) => item2.chatroomId === chatroom.id,
+      );
+      if (found) {
+        res = found.chatroomId;
+        break;
+      }
+    }
+
+    return res;
+  }
+
   async createOneToOneChatroom(friendId: number, userId: number) {
     const { id } = await this.prismaService.chatroom.create({
       data: {
@@ -29,7 +65,8 @@ export class ChatroomService {
         chatroomId: id,
       },
     });
-    return '创建成功';
+    // return '创建成功';
+    return id;
   }
 
   async createGroupChatroom(name: string, userId: number) {

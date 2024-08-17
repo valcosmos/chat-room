@@ -6,9 +6,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { ChatroomService } from './chatroom.service';
-import { UserInfo } from 'src/custom.decorator';
+import { RequireLogin, UserInfo } from 'src/custom.decorator';
 
 @Controller('chatroom')
+@RequireLogin()
 export class ChatroomController {
   constructor(private readonly chatroomService: ChatroomService) {}
 
@@ -20,6 +21,7 @@ export class ChatroomController {
     if (!friendId) {
       throw new BadRequestException('聊天好友的 id 不能为空');
     }
+    console.log('==========>createOneToOneChatroom', userId);
     return this.chatroomService.createOneToOneChatroom(friendId, userId);
   }
 
@@ -34,6 +36,17 @@ export class ChatroomController {
       throw new BadRequestException('userId 不能为空');
     }
     return this.chatroomService.list(userId, name);
+  }
+
+  @Get('findChatroom')
+  async findChatroom(
+    @Query('userId1') userId1: string,
+    @Query('userId2') userId2: string,
+  ) {
+    if (!userId1 || !userId2) {
+      throw new BadRequestException('用户 id 不能为空');
+    }
+    return this.chatroomService.queryOneToOneChatroom(+userId1, +userId2);
   }
 
   @Get('members')

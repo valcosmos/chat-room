@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Socket } from 'socket.io-client'
 import { io } from 'socket.io-client'
 import TextArea from 'antd/es/input/TextArea'
+import { useSearchParams } from 'next/navigation'
 import { chatHistoryList, chatroomList } from '@/interface'
 import type { UserInfo } from '@/app/(public)/update-info/page'
 
@@ -67,12 +68,24 @@ export function getUserInfo(): User {
 export default function Chat() {
   const socketRef = useRef<Socket>()
   const [roomId, setChatroomId] = useState<number>()
+  const [chatHistory, setChatHistory] = useState<Array<ChatHistory>>()
+
+  const searchParams = useSearchParams()
+
+  const chatroomId = searchParams.get('chatroomId')
+
+  useEffect(() => {
+    if (chatroomId) {
+      setChatroomId(+chatroomId)
+      queryChatHistoryList(+chatroomId)
+    }
+  }, [chatroomId])
 
   useEffect(() => {
     if (!roomId) {
       return
     }
-    const socket = (socketRef.current = io('http://localhost:3005'))
+    const socket = (socketRef.current = io('http://localhost:8000'))
     socket.on('connect', () => {
       const payload: JoinRoomPayload = {
         chatroomId: roomId,
@@ -118,15 +131,13 @@ export default function Chat() {
     socketRef.current?.emit('sendMessage', payload)
   }
 
-  const [chatHistory, setChatHistory] = useState<Array<ChatHistory>>()
-
   const [roomList, setRoomList] = useState<Array<Chatroom>>()
 
   const userInfo = getUserInfo()
 
   async function queryChatroomList() {
     try {
-      const res = await chatroomList('room-1')
+      const res = await chatroomList()
 
       if (res.status === 201 || res.status === 200) {
         setRoomList(
@@ -175,7 +186,7 @@ export default function Chat() {
         {roomList?.map((item) => {
           return (
             <div
-              className=""
+              className={`pl-5 border cursor-pointer ${item.id === roomId ? 'bg-sky-600 text-white' : ''}`}
               key={item.id}
               data-id={item.id}
               onClick={() => {
