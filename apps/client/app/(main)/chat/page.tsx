@@ -1,7 +1,91 @@
-import React from 'react'
+import { Input } from 'antd'
+import { useEffect, useRef, useState } from 'react'
+import type { Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
 
-export default function Chat() {
+interface JoinRoomPayload {
+  chatroomId: number
+  userId: number
+}
+
+interface SendMessagePayload {
+  sendUserId: number
+  chatroomId: number
+  message: Message
+}
+
+interface Message {
+  type: 'text' | 'image'
+  content: string
+}
+
+type Reply =
+  | {
+    type: 'sendMessage'
+    userId: number
+    message: Message
+  }
+  | {
+    type: 'joinRoom'
+    userId: number
+  }
+
+export function Chat() {
+  const [messageList, setMessageList] = useState<Array<Message>>([])
+  const socketRef = useRef<Socket>()
+
+  useEffect(() => {
+    const socket = (socketRef.current = io('http://localhost:8000'))
+    socket.on('connect', () => {
+      const payload: JoinRoomPayload = {
+        chatroomId: 1,
+        userId: 1,
+      }
+
+      socket.emit('joinRoom', payload)
+
+      socket.on('message', (reply: Reply) => {
+        if (reply.type === 'joinRoom') {
+          setMessageList(messageList => [
+            ...messageList,
+            {
+              type: 'text',
+              content: `用户 ${reply.userId}加入聊天室`,
+            },
+          ])
+        }
+        else {
+          setMessageList(messageList => [...messageList, reply.message])
+        }
+      })
+    })
+  }, [])
+
+  function sendMessage(value: string) {
+    const payload2: SendMessagePayload = {
+      sendUserId: 1,
+      chatroomId: 1,
+      message: {
+        type: 'text',
+        content: value,
+      },
+    }
+
+    socketRef.current?.emit('sendMessage', payload2)
+  }
+
   return (
-    <div>Chat</div>
+    <div>
+      <Input
+        onBlur={(e) => {
+          sendMessage(e.target.value)
+        }}
+      />
+      <div>
+        {messageList.map((item, index) => {
+          return <div key={index}>{item.type === 'image' ? <img src={item.content} /> : item.content}</div>
+        })}
+      </div>
+    </div>
   )
 }
