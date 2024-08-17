@@ -21,7 +21,7 @@ export class ChatroomController {
     if (!friendId) {
       throw new BadRequestException('聊天好友的 id 不能为空');
     }
-    console.log('==========>createOneToOneChatroom', userId);
+
     return this.chatroomService.createOneToOneChatroom(friendId, userId);
   }
 

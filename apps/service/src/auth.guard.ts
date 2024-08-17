@@ -73,8 +73,7 @@ export class AuthGuard implements CanActivate {
       );
 
       return true;
-    } catch (e) {
-      console.log(e);
+    } catch {
       throw new UnauthorizedException('token 失效，请重新登录');
     }
   }
