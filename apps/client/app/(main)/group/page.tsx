@@ -4,6 +4,10 @@ import type { ColumnsType } from 'antd/es/table'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Form, Input, Table, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
+import { useRouter } from 'next/navigation'
+import { MembersModal } from './MembersModal'
+import { AddMemberModal } from './AddMemberModal'
+import { CreateGroupModal } from './CreateGroupModal'
 import { chatroomList } from '@/interface'
 
 interface SearchGroup {
@@ -13,11 +17,24 @@ interface SearchGroup {
 interface GroupSearchResult {
   id: number
   name: string
+  type: boolean
+  userCount: number
+  userIds: Array<number>
   createTime: Date
 }
 
 export default function Group() {
   const [groupResult, setGroupResult] = useState<Array<GroupSearchResult>>([])
+
+  const [isMembersModalOpen, setMembersModalOpen] = useState(false)
+  const [isMemberAddModalOpen, setMemberAddModalOpen] = useState(false)
+  const [isCreateGroupModalOpen, setCreateGroupModalOpen] = useState(false)
+
+  const [chatroomId, setChatroomId] = useState<number>(-1)
+
+  const [queryKey, setQueryKey] = useState<string>('')
+
+  const router = useRouter()
 
   const columns: ColumnsType<GroupSearchResult> = useMemo(
     () => [
@@ -28,12 +45,44 @@ export default function Group() {
       {
         title: '创建时间',
         dataIndex: 'createTime',
+        render: (_, record) => {
+          return new Date(record.createTime).toLocaleString()
+        },
+      },
+      {
+        title: '人数',
+        dataIndex: 'userCount',
       },
       {
         title: '操作',
-        render: (_, _record) => (
-          <div>
-            <a href="#">聊天</a>
+        render: (_, record) => (
+          <div className="space-x-2">
+            <a
+              href="#"
+              onClick={() => {
+                router.push(`/chat?chatroomId=${record.id}`)
+              }}
+            >
+              聊天
+            </a>
+            <a
+              href="#"
+              onClick={() => {
+                setChatroomId(record.id)
+                setMembersModalOpen(true)
+              }}
+            >
+              详情
+            </a>
+            <a
+              href="#"
+              onClick={() => {
+                setChatroomId(record.id)
+                setMemberAddModalOpen(true)
+              }}
+            >
+              添加成员
+            </a>
           </div>
         ),
       },
@@ -47,12 +96,16 @@ export default function Group() {
 
       if (res.status === 201 || res.status === 200) {
         setGroupResult(
-          res.data.map((item: GroupSearchResult) => {
-            return {
-              ...item,
-              key: item.id,
-            }
-          }),
+          res.data
+            .filter((item: GroupSearchResult) => {
+              return item.type === true
+            })
+            .map((item: GroupSearchResult) => {
+              return {
+                ...item,
+                key: item.id,
+              }
+            }),
         )
       }
     }
@@ -87,6 +140,38 @@ export default function Group() {
       <div className="group-table">
         <Table columns={columns} dataSource={groupResult} style={{ width: '1000px' }} />
       </div>
+
+      <MembersModal
+        isOpen={isMembersModalOpen}
+        handleClose={() => {
+          setMembersModalOpen(false)
+        }}
+        chatroomId={chatroomId}
+        queryKey={queryKey}
+      />
+
+      <AddMemberModal
+        isOpen={isMemberAddModalOpen}
+        handleClose={() => {
+          setMemberAddModalOpen(false)
+
+          setQueryKey(Math.random().toString().slice(2, 10))
+          searchGroup({
+            name: form.getFieldValue('name'),
+          })
+        }}
+        chatroomId={chatroomId}
+      />
+      <CreateGroupModal
+        isOpen={isCreateGroupModalOpen}
+        handleClose={() => {
+          setCreateGroupModalOpen(false)
+
+          searchGroup({
+            name: form.getFieldValue('name'),
+          })
+        }}
+      />
     </div>
   )
 }

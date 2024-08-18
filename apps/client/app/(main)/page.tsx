@@ -46,6 +46,14 @@ export default function Home() {
   const columns: ColumnsType<FriendshipSearchResult> = useMemo(
     () => [
       {
+        title: 'ID',
+        dataIndex: 'id',
+      },
+      {
+        title: '用户名',
+        dataIndex: 'username',
+      },
+      {
         title: '昵称',
         dataIndex: 'nickName',
       },
