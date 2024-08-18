@@ -1,11 +1,15 @@
 'use client'
 
-import { Button, message } from 'antd'
+import { Button, Popover, message } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import type { Socket } from 'socket.io-client'
 import { io } from 'socket.io-client'
 import TextArea from 'antd/es/input/TextArea'
 import { useSearchParams } from 'next/navigation'
+import EmojiPicker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
+
+import { UploadModal } from './UploadModal'
 import { chatHistoryList, chatroomList } from '@/interface'
 import type { UserInfo } from '@/app/(public)/update-info/page'
 
@@ -20,8 +24,10 @@ interface SendMessagePayload {
   message: Message
 }
 
+type MessageType = 'image' | 'text' | 'file'
+
 interface Message {
-  type: 'text' | 'image'
+  type: MessageType
   content: string
 }
 
@@ -68,7 +74,11 @@ export function getUserInfo(): User {
 export default function Chat() {
   const socketRef = useRef<Socket>()
   const [roomId, setChatroomId] = useState<number>()
+  const [isUploadImageModalOpen, setUploadImageModalOpen] = useState(false)
+
   const [chatHistory, setChatHistory] = useState<Array<ChatHistory>>()
+
+  const [uploadType, setUploadType] = useState<'image' | 'file'>('image')
 
   const searchParams = useSearchParams()
 
@@ -111,7 +121,7 @@ export default function Chat() {
     }
   }, [roomId])
 
-  function sendMessage(value: string) {
+  function sendMessage(value: string, type: MessageType = 'text') {
     if (!value) {
       return
     }
@@ -123,7 +133,7 @@ export default function Chat() {
       sendUserId: getUserInfo().id,
       chatroomId: roomId,
       message: {
-        type: 'text',
+        type,
         content: value,
       },
     }
@@ -214,7 +224,21 @@ export default function Chat() {
               <div
                 className={`border border-black px-5 py-2.5 rounded bg-sky-600 ${item.senderId === userInfo.id ? 'text-right justify-end bg-white' : ''}`}
               >
-                {item.content}
+                {item.type === 0
+                  ? (
+                      item.content
+                    )
+                  : item.type === 1
+                    ? (
+                        <img src={item.content} style={{ maxWidth: 200 }} />
+                      )
+                    : (
+                        <div>
+                          <a download href={item.content}>
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
               </div>
             </div>
           )
@@ -224,12 +248,39 @@ export default function Chat() {
       <div className="w-[648px] border border-black h-[100px] absolute bottom-0 right-0">
         <div className="flex">
           <div className="w-[100px] hover:font-bold cursor-pointer" key={1}>
-            表情
+            <Popover
+              content={(
+                <EmojiPicker
+                  data={data}
+                  onEmojiSelect={(emoji: any) => {
+                    setInputText(inputText => inputText + emoji.native)
+                  }}
+                />
+              )}
+              title="Title"
+              trigger="click"
+            >
+              表情
+            </Popover>
           </div>
-          <div className="w-[100px] hover:font-bold cursor-pointer" key={2}>
+          <div
+            className="w-[100px] hover:font-bold cursor-pointer"
+            key={2}
+            onClick={() => {
+              setUploadType('image')
+              setUploadImageModalOpen(true)
+            }}
+          >
             图片
           </div>
-          <div className="w-[100px] hover:font-bold cursor-pointer" key={3}>
+          <div
+            className="w-[100px] hover:font-bold cursor-pointer"
+            key={3}
+            onClick={(() => {
+              setUploadType('file')
+              setUploadImageModalOpen(true)
+            })}
+          >
             文件
           </div>
         </div>
@@ -253,6 +304,15 @@ export default function Chat() {
           </Button>
         </div>
       </div>
+      <UploadModal
+        isOpen={isUploadImageModalOpen}
+        type={uploadType}
+        handleClose={(imgSrc) => {
+          setUploadImageModalOpen(false)
+          if (imgSrc)
+            sendMessage(imgSrc, uploadType)
+        }}
+      />
     </div>
   )
 }
