@@ -10,7 +10,7 @@ import EmojiPicker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
 
 import { UploadModal } from './UploadModal'
-import { chatHistoryList, chatroomList } from '@/interface'
+import { chatHistoryList, chatroomList, favoriteAdd } from '@/interface'
 import type { UserInfo } from '@/app/(public)/update-info/page'
 
 interface JoinRoomPayload {
@@ -190,6 +190,19 @@ export default function Chat() {
   }
   const [inputText, setInputText] = useState('')
 
+  async function addToFavorite(chatHistoryId: number) {
+    try {
+      const res = await favoriteAdd(chatHistoryId)
+
+      if (res.status === 201 || res.status === 200) {
+        message.success('收藏成功')
+      }
+    }
+    catch (e: any) {
+      message.error(e.response?.data?.message || '系统繁忙，请稍后再试')
+    }
+  }
+
   return (
     <div className="relative flex m-5 w-[800px] h-[600px]">
       <div className="w-[150px] border border-black overflow-auto">
@@ -216,6 +229,9 @@ export default function Chat() {
               className={`p-5 flex flex-wrap ${item.senderId === userInfo.id ? 'text-right justify-end' : ''}`}
               key={item.id}
               data-id={item.id}
+              onDoubleClick={() => {
+                addToFavorite(item.id)
+              }}
             >
               <div className="w-full">
                 <img className="w-5 h-5 pr-2.5" src={item.sender.headPic} />
