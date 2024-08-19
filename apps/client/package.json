@@ -19,7 +19,7 @@
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
-    "socket.io-client": "^4.7.4"
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.26.0",
